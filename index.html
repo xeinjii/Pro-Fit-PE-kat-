@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pro-Fit PE Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="icon" type="image/png" href="https://uxwing.com/wp-content/themes/uxwing/download/fitness-gym-yoga-spa/health-fitness-icon.png">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #f8fafc;
+            --card-bg: #ffffff;
+            --primary: #6366f1;
+            --secondary: #ec4899;
+            --text: #1e293b;
+            --border: #e2e8f0;
+            --success: #22c55e;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+        }
+
+        body { 
+            font-family: 'Outfit', sans-serif; 
+            background-color: var(--bg);
+            background-image: radial-gradient(#6366f110 1px, transparent 1px);
+            background-size: 20px 20px;
+            color: var(--text);
+            margin: 0; padding: 20px;
+            display: flex; flex-direction: column; align-items: center;
+        }
+
+        .dashboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+            gap: 20px;
+            width: 100%;
+            max-width: 1100px;
+        }
+
+        .card { 
+            background: var(--card-bg);
+            padding: 25px;
+            border-radius: 24px;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
+            border: 1px solid var(--border);
+        }
+
+        .full-width { grid-column: 1 / -1; }
+
+        header { text-align: center; margin-bottom: 40px; }
+        header h1 { font-size: 2.5rem; margin: 0; background: linear-gradient(to right, var(--primary), var(--secondary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+
+        h3 { margin-top: 0; font-weight: 600; color: #475569; display: flex; justify-content: space-between; align-items: center;}
+
+        label { font-size: 0.85rem; font-weight: 600; color: #64748b; margin-left: 5px; }
+
+        input, select, button { 
+            width: 100%; padding: 12px; margin: 8px 0 15px 0;
+            border-radius: 12px; border: 1.5px solid var(--border);
+            font-family: inherit; font-size: 1rem; outline: none;
+            box-sizing: border-box;
+        }
+
+        select:focus, input:focus { border-color: var(--primary); }
+
+        button { 
+            background: var(--primary); color: white;
+            font-weight: 600; cursor: pointer; border: none;
+            transition: all 0.2s ease;
+        }
+
+        button:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3); }
+        
+        .btn-outline { background: transparent; border: 1.5px solid var(--border); color: #64748b; font-size: 0.8rem; padding: 5px 10px; width: auto; }
+
+        .bmi-badge {
+            display: none;
+            margin-top: 10px;
+            padding: 15px;
+            border-radius: 12px;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        #historyList { margin: 0; padding: 0; list-style: none; }
+        .history-item { 
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 12px; border-bottom: 1px solid var(--border);
+            animation: fadeIn 0.5s ease;
+        }
+        .history-item:last-child { border: none; }
+        .tag { font-size: 0.75rem; padding: 4px 8px; border-radius: 20px; background: #f1f5f9; font-weight: 600; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>FitPulse Pro</h1>
+    <p>Advanced PE Activity Tracker • 2026 Edition</p>
+</header>
+
+<div class="dashboard">
+    <div class="card">
+        <h3>⚡ Log Workout</h3>
+        <label>Select Exercise</label>
+        <select id="activity">
+            <optgroup label="Cardio/Aerobic">
+                <option>Running</option><option>Jogging</option><option>Cycling</option>
+                <option>Swimming</option><option>Jump Rope</option><option>Walking</option>
+            </optgroup>
+            <optgroup label="Team Sports">
+                <option>Basketball</option><option>Football</option><option>Volleyball</option>
+                <option>Badminton</option><option>Tennis</option>
+            </optgroup>
+            <optgroup label="Strength & Core">
+                <option>Push-ups</option><option>Sit-ups</option><option>Plank</option>
+                <option>Squats</option><option>Weightlifting</option><option>Burpees</option>
+            </optgroup>
+            <optgroup label="Flexibility/Mindfulness">
+                <option>Yoga</option><option>Stretching</option><option>Pilates</option>
+            </optgroup>
+        </select>
+        <label>Duration (Minutes)</label>
+        <input type="number" id="minutes" placeholder="e.g. 30">
+        <button onclick="trackFitness()">Add to Weekly Goal</button>
+    </div>
+
+    <div class="card">
+        <h3>📏 BMI Calculator</h3>
+        <label>Height (cm)</label>
+        <input type="number" id="height" placeholder="e.g. 170">
+        <label>Weight (kg)</label>
+        <input type="number" id="weight" placeholder="e.g. 65">
+        <button onclick="calculateBMI()" style="background: var(--secondary);">Check Health Status</button>
+        <div id="bmiBadge" class="bmi-badge"></div>
+    </div>
+
+    <div class="card">
+        <h3>📊 Weekly Flow <span style="font-size: 0.8rem; font-weight: 400;">(Real-time)</span></h3>
+        <canvas id="fitnessChart"></canvas>
+    </div>
+
+    <div class="card full-width">
+        <h3>
+            📜 Recent Activity 
+            <button class="btn-outline" onclick="clearData()">Clear All</button>
+        </h3>
+        <div id="historyList"></div>
+    </div>
+</div>
+
+<script>
+    // DATA INITIALIZATION
+    let weeklyData = JSON.parse(localStorage.getItem('weeklyData_v2')) || [0,0,0,0,0,0,0];
+    let history = JSON.parse(localStorage.getItem('historyLog_v2')) || [];
+
+    // CHART SETUP
+    const ctx = document.getElementById('fitnessChart').getContext('2d');
+    const gradient = ctx.createLinearGradient(0, 0, 0, 300);
+    gradient.addColorStop(0, '#6366f1');
+    gradient.addColorStop(1, '#a5b4fc');
+
+    let chart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
+            datasets: [{
+                label: 'Minutes',
+                data: weeklyData,
+                backgroundColor: gradient,
+                borderRadius: 8,
+                hoverBackgroundColor: '#ec4899'
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: { legend: { display: false } },
+            scales: {
+                y: { beginAtZero: true, grid: { display: false } },
+                x: { grid: { display: false } }
+            }
+        }
+    });
+
+    // BMI LOGIC
+    function calculateBMI() {
+        const h = document.getElementById('height').value / 100;
+        const w = document.getElementById('weight').value;
+        const badge = document.getElementById('bmiBadge');
+
+        if (!h || !w) {
+            alert("Please enter both height and weight.");
+            return;
+        }
+
+        const bmi = (w / (h * h)).toFixed(1);
+        let status = "";
+        let color = "";
+        let bgColor = "";
+
+        if (bmi < 18.5) {
+            status = "Underweight";
+            color = "#0369a1";
+            bgColor = "#e0f2fe";
+        } else if (bmi < 25) {
+            status = "Normal Weight";
+            color = "#15803d";
+            bgColor = "#dcfce7";
+        } else if (bmi < 30) {
+            status = "Overweight";
+            color = "#b45309";
+            bgColor = "#fef3c7";
+        } else {
+            status = "Obese";
+            color = "#b91c1c";
+            bgColor = "#fee2e2";
+        }
+
+        badge.style.display = "block";
+        badge.style.color = color;
+        badge.style.backgroundColor = bgColor;
+        badge.innerHTML = `BMI: ${bmi} — ${status}`;
+    }
+
+    // ACTIVITY TRACKING LOGIC
+    function trackFitness() {
+        const act = document.getElementById('activity').value;
+        const minInput = document.getElementById('minutes');
+        const min = parseInt(minInput.value);
+
+        if (isNaN(min) || min <= 0) {
+            alert("Please enter valid minutes.");
+            return;
+        }
+
+        const today = new Date().getDay(); 
+        weeklyData[today] += min;
+        
+        history.unshift({
+            act, 
+            min, 
+            time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
+            date: new Date().toLocaleDateString()
+        });
+
+        if(history.length > 8) history.pop();
+        saveAndUpdate();
+        minInput.value = '';
+    }
+
+    function saveAndUpdate() {
+        localStorage.setItem('weeklyData_v2', JSON.stringify(weeklyData));
+        localStorage.setItem('historyLog_v2', JSON.stringify(history));
+        chart.data.datasets[0].data = weeklyData;
+        chart.update();
+        renderHistory();
+    }
+
+    function renderHistory() {
+        const container = document.getElementById('historyList');
+        if (history.length === 0) {
+            container.innerHTML = '<p style="color:#94a3b8; text-align:center;">No activities logged yet.</p>';
+            return;
+        }
+        container.innerHTML = history.map(item => `
+            <div class="history-item">
+                <div>
+                    <span style="font-weight:600;">${item.act}</span>
+                    <div style="font-size:0.7rem; color:#94a3b8;">${item.date} • ${item.time}</div>
+                </div>
+                <span class="tag">${item.min} MINS</span>
+            </div>
+        `).join('');
+    }
+
+    function clearData() {
+        if(confirm("Reset all progress?")) {
+            weeklyData = [0,0,0,0,0,0,0];
+            history = [];
+            saveAndUpdate();
+        }
+    }
+
+    renderHistory();
+</script>
+
+</body>
+</html>
