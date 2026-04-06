@@ -7,93 +7,137 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="icon" type="image/png" href="https://uxwing.com/wp-content/themes/uxwing/download/fitness-gym-yoga-spa/health-fitness-icon.png">
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --bg: #f8fafc;
-            --card-bg: #ffffff;
-            --primary: #6366f1;
-            --secondary: #ec4899;
-            --text: #1e293b;
-            --border: #e2e8f0;
-            --success: #22c55e;
-            --warning: #f59e0b;
-            --danger: #ef4444;
-        }
+  <style>
+    :root {
+        --bg: #f8fafc;
+        --card-bg: #ffffff;
+        --primary: #6366f1;
+        --secondary: #ec4899;
+        --text: #1e293b;
+        --border: #e2e8f0;
+    }
 
-        body { 
-            font-family: 'Outfit', sans-serif; 
-            background-color: var(--bg);
-            background-image: radial-gradient(#6366f110 1px, transparent 1px);
-            background-size: 20px 20px;
-            color: var(--text);
-            margin: 0; padding: 20px;
-            display: flex; flex-direction: column; align-items: center;
-        }
+    body { 
+        font-family: 'Outfit', sans-serif; 
+        background-color: var(--bg);
+        background-image: radial-gradient(#6366f110 1px, transparent 1px);
+        background-size: 20px 20px;
+        color: var(--text);
+        margin: 0; 
+        padding: clamp(10px, 5vw, 40px); /* Fluid padding based on screen size */
+        display: flex; 
+        flex-direction: column; 
+        align-items: center; 
+        min-height: 100vh;
+    }
 
+    /* THE RESPONSIVE GRID */
+    .dashboard {
+        display: grid;
+        /* auto-fit makes cards expand to fill space, minmax prevents them from getting too small */
+        grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr));
+        gap: clamp(15px, 3vw, 25px);
+        width: 100%;
+        max-width: 1200px;
+    }
+
+    .card { 
+        background: var(--card-bg);
+        padding: clamp(15px, 4vw, 25px);
+        border-radius: 24px;
+        box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+        border: 1px solid var(--border);
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    /* Forces specific cards to span full width on large screens */
+    .full-width { 
+        grid-column: 1 / -1; 
+    }
+
+    header { 
+        text-align: center; 
+        margin-bottom: clamp(20px, 8vw, 50px); 
+        width: 100%;
+    }
+
+    header h1 { 
+        font-size: clamp(1.8rem, 5vw, 2.8rem); /* Font scales with screen size */
+        margin: 0; 
+        background: linear-gradient(to right, var(--primary), var(--secondary)); 
+        -webkit-background-clip: text; 
+        -webkit-text-fill-color: transparent; 
+    }
+
+    h3 { margin-top: 0; font-weight: 600; color: #475569; display: flex; justify-content: space-between; align-items: center; gap: 10px;}
+
+    label { font-size: 0.85rem; font-weight: 600; color: #64748b; margin-left: 5px; display: block; text-align: left; }
+
+    input, select, button { 
+        width: 100%; padding: 12px; margin: 8px 0 15px 0;
+        border-radius: 12px; border: 1.5px solid var(--border);
+        font-family: inherit; font-size: 1rem; outline: none;
+        box-sizing: border-box;
+    }
+
+    button { background: var(--primary); color: white; font-weight: 600; cursor: pointer; border: none; transition: 0.2s; }
+    button:hover { transform: translateY(-2px); filter: brightness(1.1); }
+    
+    .btn-outline { background: transparent; border: 1.5px solid var(--border); color: #64748b; font-size: 0.8rem; padding: 5px 10px; width: auto; margin: 0; }
+
+    #historyList { margin: 0; padding: 0; list-style: none; width: 100%; }
+    
+    .history-item { 
+        display: flex; 
+        justify-content: space-between; 
+        align-items: center;
+        padding: 12px 0; 
+        border-bottom: 1px solid var(--border);
+        gap: 10px;
+    }
+
+    /* --- BREAKPOINTS --- */
+
+    /* Tablet/Small Laptops */
+    @media (max-width: 900px) {
         .dashboard {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
-            gap: 20px;
-            width: 100%;
-            max-width: 1100px;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
         }
+    }
 
-        .card { 
-            background: var(--card-bg);
-            padding: 25px;
-            border-radius: 24px;
-            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
-            border: 1px solid var(--border);
-        }
-
-        .full-width { grid-column: 1 / -1; }
-
-        header { text-align: center; margin-bottom: 40px; }
-        header h1 { font-size: 2.5rem; margin: 0; background: linear-gradient(to right, var(--primary), var(--secondary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-
-        h3 { margin-top: 0; font-weight: 600; color: #475569; display: flex; justify-content: space-between; align-items: center;}
-
-        label { font-size: 0.85rem; font-weight: 600; color: #64748b; margin-left: 5px; }
-
-        input, select, button { 
-            width: 100%; padding: 12px; margin: 8px 0 15px 0;
-            border-radius: 12px; border: 1.5px solid var(--border);
-            font-family: inherit; font-size: 1rem; outline: none;
-            box-sizing: border-box;
-        }
-
-        select:focus, input:focus { border-color: var(--primary); }
-
-        button { 
-            background: var(--primary); color: white;
-            font-weight: 600; cursor: pointer; border: none;
-            transition: all 0.2s ease;
-        }
-
-        button:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3); }
+    /* Mobile Phones */
+    @media (max-width: 600px) {
+        body { padding: 15px; }
         
-        .btn-outline { background: transparent; border: 1.5px solid var(--border); color: #64748b; font-size: 0.8rem; padding: 5px 10px; width: auto; }
+        /* Stack everything vertically and center it */
+        .dashboard { 
+            grid-template-columns: 1fr; 
+        }
 
-        .bmi-badge {
-            display: none;
-            margin-top: 10px;
-            padding: 15px;
-            border-radius: 12px;
+        .card {
             text-align: center;
-            font-weight: 600;
+            align-items: center;
         }
 
-        #historyList { margin: 0; padding: 0; list-style: none; }
+        h3 { 
+            flex-direction: column; 
+            text-align: center;
+        }
+
         .history-item { 
-            display: flex; justify-content: space-between; align-items: center;
-            padding: 12px; border-bottom: 1px solid var(--border);
-            animation: fadeIn 0.5s ease;
+            flex-direction: column; 
+            text-align: center;
+            padding: 15px 0;
         }
-        .history-item:last-child { border: none; }
-        .tag { font-size: 0.75rem; padding: 4px 8px; border-radius: 20px; background: #f1f5f9; font-weight: 600; }
 
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-    </style>
+        label { text-align: center; width: 100%; }
+
+        .btn-outline { width: 100%; margin-top: 10px; }
+    }
+</style>
 </head>
 <body>
 
